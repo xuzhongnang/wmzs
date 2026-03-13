@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外贸助手 (TradeAI) - 智能企业名查验平台</title>
+    <!-- 引入科技感与现代感字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --surface-color: rgba(22, 28, 45, 0.7);
+            --surface-hover: rgba(30, 38, 60, 0.8);
+            --border-color: rgba(64, 112, 244, 0.2);
+            --primary: #4070f4;
+            --primary-light: #6b8df8;
+            --secondary: #00d2ff;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gradient-1: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* 背景几何图形与光效 */
+        .bg-shapes {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .shape-1 {
+            position: absolute;
+            top: -10%; left: 10%;
+            width: 50vw; height: 50vw;
+            background: radial-gradient(circle, rgba(64,112,244,0.15) 0%, transparent 60%);
+            filter: blur(40px);
+            animation: pulse-slow 8s infinite alternate ease-in-out;
+        }
+
+        .shape-2 {
+            position: absolute;
+            bottom: -20%; right: -10%;
+            width: 60vw; height: 60vw;
+            background: radial-gradient(circle, rgba(0,210,255,0.1) 0%, transparent 60%);
+            filter: blur(60px);
+            animation: pulse-slow 12s infinite alternate-reverse ease-in-out;
+        }
+
+        .grid-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+        }
+
+        @keyframes pulse-slow {
+            0% { transform: scale(1) translate(0, 0); opacity: 0.8; }
+            100% { transform: scale(1.1) translate(30px, -30px); opacity: 1; }
+        }
+
+        /* 通用布局层 */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 5%;
+        }
+
+        /* 顶部导航 */
+        header {
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(11, 15, 25, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px; height: 32px;
+            background: var(--gradient-1);
+            border-radius: 8px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            margin-left: 30px;
+            font-size: 15px;
+            font-weight: 500;
+            opacity: 0.8;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+            color: var(--secondary);
+        }
+        
+        .contact-btn {
+            padding: 8px 24px;
+            border-radius: 20px;
+            background: rgba(64,112,244,0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary-light) !important;
+            font-weight: 600;
+        }
+        .contact-btn:hover {
+            background: var(--primary);
+            color: #fff !important;
+            box-shadow: 0 0 15px rgba(64,112,244,0.4);
+        }
+
+        /* 首屏 Hero */
+        .hero {
+            padding: 120px 0 80px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            color: var(--secondary);
+            margin-bottom: 24px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 .highlight {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto 40px;
+        }
+
+        /* 搜索框演示 */
+        .search-demo-container {
+            max-width: 700px;
+            margin: 0 auto 60px;
+            position: relative;
+        }
+
+        .search-bar {
+            display: flex;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px 8px 8px 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            align-items: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--secondary);
+            box-shadow: 0 20px 50px rgba(0,210,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .search-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            outline: none;
+        }
+        
+        .search-bar input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+
+        .search-btn {
+            background: var(--gradient-1);
+            border: none;
+            color: #fff;
+            padding: 14px 32px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-btn:hover {
+            box-shadow: 0 0 20px rgba(64,112,244,0.5);
+        }
+
+        /* 浮动提示词 */
+        .floating-tag {
+            position: absolute;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            backdrop-filter: blur(4px);
+            color: var(--text-muted);
+            animation: float-up-down 4s infinite ease-in-out;
+        }
+
+        .tag-1 { top: -20px; left: -40px; animation-delay: 0s; }
+        .tag-2 { bottom: -30px; right: 20px; animation-delay: 1s; }
+        .tag-3 { top: 30px; right: -60px; animation-delay: 2s; }
+
+        @keyframes float-up-down {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* 统一的区块间距与标题 */
+        .section {
+            padding: 100px 0;
+            border-top: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 痛点卡片卡片网格 */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--surface-color);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 40px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px; height: 100%;
+            background: var(--gradient-1);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: var(--surface-hover);
+            border-color: var(--border-color);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            color: var(--secondary);
+            margin-bottom: 24px;
+            display: inline-block;
+            background: rgba(0,210,255,0.1);
+            width: 64px; height: 64px;
+            line-height: 64px;
+            text-align: center;
+            border-radius: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        /* 场景演示区 (核心价值) */
+        .scenario-showcase {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+        
+        .scenario-showcase.reverse {
+            flex-direction: row-reverse;
+        }
+
+        .scenario-text {
+            flex: 1;
+        }
+
+        .scenario-text h3 {
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+        
+        .scenario-text p {
+            color: var(--text-muted);
+            font-size: 18px;
+            margin-bottom: 24px;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 16px;
+            color: #ccc;
+        }
+
+        .feature-list li i {
+            color: var(--success);
+            margin-top: 4px;
+        }
+
+        .scenario-visual {
+            flex: 1;
+            background: #111526;
+            border: 1px solid #1f2640;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            position: relative;
+        }
+
+        .mock-window-header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .mock-dot {
+            width: 12px; height: 12px; border-radius: 50%;
+        }
+
+        .mock-result-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .mock-result-item:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .mock-badge {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+        .mb-official { background: rgba(16,185,129,0.1); color: var(--success); border: 1px solid rgba(16,185,129,0.2); }
+        .mb-platform { background: rgba(64,112,244,0.1); color: var(--primary-light); border: 1px solid rgba(64,112,244,0.2); }
+        .mb-history { background: rgba(245,158,11,0.1); color: var(--warning); border: 1px solid rgba(245,158,11,0.2); }
+
+        .mock-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .mock-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* 合作方案区 */
+        .partnership-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .partner-card {
+            background: linear-gradient(180deg, rgba(30, 38, 60, 0.4) 0%, rgba(22, 28, 45, 0.2) 100%);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+        }
+        
+        .partner-card h4 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+        
+        .partner-card p {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin-bottom: 24px;
+        }
+
+        .partner-steps {
+            text-align: left;
+            margin-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 24px;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #ddd;
+        }
+        .step-num {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: bold;
+        }
+
+        /* 底部 CTA 与 Footer */
+        .cta-section {
+            background: var(--gradient-1);
+            border-radius: 24px;
+            padding: 60px;
+            text-align: center;
+            margin-bottom: 80px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(64,112,244,0.3);
+        }
+        
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTIwLDBMMjAsNDBMMTksNDBMMTksMEwyMCwwWiBNMCwyMEw0MCwyMEw0MCwxOUwwLDE5TDBjMjBaIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L3N2Zz4=');
+        }
+
+        .cta-section h2 {
+            font-size: 36px;
+            margin-bottom: 16px;
+            position: relative; z-index: 1;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            margin-bottom: 32px;
+            opacity: 0.9;
+            position: relative; z-index: 1;
+        }
+
+        .btn-light {
+            background: #fff;
+            color: var(--primary);
+            padding: 16px 40px;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            position: relative; z-index: 1;
+        }
+        
+        .btn-light:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            font-size: 14px;
+        }
+
+        /* 动画控制 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 900px) {
+            .hero h1 { font-size: 40px; }
+            .grid-cards { grid-template-columns: 1fr; }
+            .scenario-showcase, .scenario-showcase.reverse { flex-direction: column; }
+            .partnership-grid { grid-template-columns: 1fr; }
+            .search-bar { flex-direction: column; border-radius: 16px; padding: 16px; }
+            .search-btn { width: 100%; justify-content: center; margin-top: 12px; }
+            .floating-tag { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-shapes">
+        <div class="shape-1"></div>
+        <div class="shape-2"></div>
+        <div class="grid-bg"></div>
+    </div>
+
+    <header>
+        <div class="container" style="display: flex; justify-content: space-between; width: 100%;">
+            <div class="logo">
+                <div class="logo-icon"><i class="fa-solid fa-globe"></i></div>
+                <span>TradeAI 助销</span>
+            </div>
+            <nav class="nav-links">
+                <a href="#painpoints">行业痛点</a>
+                <a href="#scenarios">核心场景</a>
+                <a href="#partnership">合作计划</a>
+                <a href="#contact" class="contact-btn">申请内测</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- 首屏 -->
+        <section class="hero container reveal">
+            <div class="hero-badge">🚀 专为外贸与跨境场景打造</div>
+            <h1>企业主体名的 <span class="highlight">智能映射引擎</span></h1>
+            <p>不要把外贸合规当作简单的“翻译”问题。输入中文名，一键穿透官网、平台、海关数据，获取带有确凿来源证据的海外真实英文主体与公开线索。</p>
+            
+            <div class="search-demo-container">
+                <div class="floating-tag tag-1">发票抬头查验</div>
+                <div class="floating-tag tag-2">单证主体防错</div>
+                <div class="floating-tag tag-3">竞品官网挖掘</div>
+                
+                <div class="search-bar">
+                    <span style="color:var(--text-muted); font-size: 20px; margin-right: 12px;"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" placeholder="输入中国公司中文名称，例如：浙江某某进出口有限公司" readonly>
+                    <button class="search-btn">
+                        <span>立即智能溯源</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+                <p style="font-size: 14px; color: var(--text-muted); margin-top: 16px;">
+                    <i class="fa-solid fa-check-circle" style="color:var(--success);"></i> 超过5层数据穿透核验
+                    <span style="margin: 0 10px;">|</span>
+                    <i class="fa-solid fa-shield-halved" style="color:var(--primary-light);"></i> 拒绝无依据纯AI捏造
+                </p>
+            </div>
+        </section>
+
+        <!-- 痛点区 -->
+        <section id="painpoints" class="section container">
+            <div class="section-header reveal">
+                <h2>为什么翻译工具无法解决外贸难题？</h2>
+                <p>在真实业务中，企业名称并不是简单的中英互译，而是关乎资金与法律效力的业务风险问题。</p>
+            </div>
+            
+            <div class="grid-cards">
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fa-solid fa-file-invoice"></i></div>
+                    <h3>单证盲搜，风险极高</h3>
+                    <p>只知道供应商的中文名，不知道该用哪个英文名做报价、PI、Invoice或合同。用错主体名称导致退汇、清关延误、海外合同事实性失效。</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fa-solid fa-masks-theater"></i></div>
+                    <h3>一企多名，难辨真伪</h3>
+                    <p>同一家公司往往同时存在官网全称、Alibaba平台名、品牌简称、香港公司别名。使用场景不同，普通搜索工具无法帮你筛选判断选哪一个。</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <h3>低效的重复人工作业</h3>
+                    <p>外贸跟单、单证和货代团队每天都在重复“百度搜中文 -> 猜英文 -> 谷歌搜英文校验 -> 查平台”的低效流程，消耗极大的人力成本。</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                    <h3>竞品调查的“隐形门槛”</h3>
+                    <p>想查国内竞品的官网、海外社媒、展会记录，但如果连对方出海时确切使用的英文名字都查不到，整个商业背调根本无从下手。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 核心场景区 -->
+        <section id="scenarios" class="section container">
+            <div class="section-header reveal">
+                <h2>将未知化为透明的查询体验</h2>
+                <p>我们输出的不仅是一个“名字”，更是一份附带确凿证据的可信使用指南。</p>
+            </div>
+
+            <div class="scenario-showcase reveal">
+                <div class="scenario-text">
+                    <div style="color: var(--primary-light); font-weight: 700; margin-bottom: 8px; font-size: 14px; letter-spacing: 1px;">SCENARIO A</div>
+                    <h3>中文名 → 寻英文精准主体</h3>
+                    <p>告别盲猜，一键获取经过多源对比清洗的英文抬头。每一条结果都附带详细的出处考证，让你知道“为什么选它”。</p>
+                    <ul class="feature-list">
+                        <li><i class="fa-solid fa-check"></i> 智能剥离 Co., Ltd 等复杂业务后缀</li>
+                        <li><i class="fa-solid fa-check"></i> 自动归并同一家企业在不同平台的名称</li>
+                        <li><i class="fa-solid fa-check"></i> 附带官网/平台等直接验证链接</li>
+                    </ul>
+                </div>
+                <div class="scenario-visual">
+                    <div class="mock-window-header">
+                        <div class="mock-dot" style="background: #ff5f56;"></div>
+                        <div class="mock-dot" style="background: #ffbd2e;"></div>
+                        <div class="mock-dot" style="background: #27c93f;"></div>
+                    </div>
+                    <div style="margin-bottom: 12px; font-size: 14px; color: #fff;">目标：浙江某电商科技有限公司</div>
+                    
+                    <div class="mock-result-item" style="border-left: 3px solid var(--success);">
+                        <div>
+                            <div class="mock-badge mb-official">官方登记/推荐</div>
+                            <div class="mock-name">ZHEJIANG MOUMO E-COMMERCE CO., LTD</div>
+                            <div class="mock-desc">来源于海关口岸出口记录 (2025匹配)</div>
+                        </div>
+                        <i class="fa-regular fa-copy" style="color: var(--text-muted);"></i>
+                    </div>
+                    
+                    <div class="mock-result-item" style="border-left: 3px solid var(--primary-light);">
+                        <div>
+                            <div class="mock-badge mb-platform">企业官网展现</div>
+                            <div class="mock-name">Moumo Technology</div>
+                            <div class="mock-desc">提取自：www.moumo-global.com/contact</div>
+                        </div>
+                        <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--text-muted);"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scenario-showcase reverse reveal">
+                <div class="scenario-text">
+                    <div style="color: var(--warning); font-weight: 700; margin-bottom: 8px; font-size: 14px; letter-spacing: 1px;">SCENARIO B</div>
+                    <h3>英文名反向溯源 → 挖出背后主干</h3>
+                    <p>收到一纸海外询盘或平台数据表，只写了英文简写？我们帮你反向剥析，锁定那家隐藏在背后的实控国内工厂或贸易商。</p>
+                    <ul class="feature-list">
+                        <li><i class="fa-solid fa-check"></i> 强力关联商标、产品类目及省市区域</li>
+                        <li><i class="fa-solid fa-check"></i> 提供匹配置信度分级（高/中/低）评估</li>
+                        <li><i class="fa-solid fa-check"></i> 是提单核对、竞品摸底的绝佳助手</li>
+                    </ul>
+                </div>
+                <div class="scenario-visual">
+                    <div class="mock-window-header">
+                        <div class="mock-dot" style="background: #ff5f56;"></div>
+                        <div class="mock-dot" style="background: #ffbd2e;"></div>
+                        <div class="mock-dot" style="background: #27c93f;"></div>
+                    </div>
+                    <div style="margin-bottom: 12px; font-size: 14px; color: #fff;">线索：SunJoy Outdoor Furniture</div>
+                    
+                    <div class="mock-result-item">
+                        <div>
+                            <div class="mock-name">🎯 可能是：宁波天悦户外休闲用品有限公司</div>
+                            <div class="mock-desc" style="margin-top: 8px;">
+                                <span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 6px;">置信度：92%</span>
+                                <span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 11px;">线索：MIC平台对应及历史提单</span>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right" style="color: var(--text-muted);"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 合作方式区 -->
+        <section id="partnership" class="section container">
+            <div class="section-header reveal">
+                <h2>共建标准化，寻找首批同行者</h2>
+                <p>我们首批重点聚焦浙江产业带及宁波口岸业务链路。诚邀货代、SaaS系统及单证团队开展轻量级试点合作。</p>
+            </div>
+
+            <div class="partnership-grid reveal">
+                <div class="partner-card">
+                    <div class="feature-icon" style="background: rgba(16,185,129,0.1); color: var(--success);"><i class="fa-solid fa-flask"></i></div>
+                    <h4>业务基准试点</h4>
+                    <p>面向：实体外贸/货代/报关团队<br>目标：替换现有人工盲搜测算效能</p>
+                    <div class="partner-steps">
+                        <div class="step-item"><div class="step-num">1</div> 提供 50+ 贵司历史常错样本</div>
+                        <div class="step-item"><div class="step-num">2</div> 工具内测跑批，对比精确度与耗时</div>
+                        <div class="step-item"><div class="step-num">3</div> 评估通过进入第二期团队部署</div>
+                    </div>
+                </div>
+
+                <div class="partner-card" style="border-color: var(--primary);">
+                    <div class="feature-icon"><i class="fa-solid fa-puzzle-piece"></i></div>
+                    <h4>系统生态集成</h4>
+                    <p>面向：外贸SaaS / CRM / ERP<br>目标：作为底层查验能力赋能模块</p>
+                    <div class="partner-steps">
+                        <div class="step-item"><div class="step-num">1</div> 联合测试录单验证场景</div>
+                        <div class="step-item"><div class="step-num">2</div> API 接口形式白标调用接入</div>
+                        <div class="step-item"><div class="step-num">3</div> 针对特性系统的定制化调优</div>
+                    </div>
+                </div>
+
+                <div class="partner-card">
+                    <div class="feature-icon" style="background: rgba(245,158,11,0.1); color: var(--warning);"><i class="fa-solid fa-handshake"></i></div>
+                    <h4>渠道推广共享</h4>
+                    <p>面向：跨境服务商 / 商协会社群<br>目标：资源互换与收益分润</p>
+                    <div class="partner-steps">
+                        <div class="step-item"><div class="step-num">1</div> 申请渠道专属内测授权</div>
+                        <div class="step-item"><div class="step-num">2</div> 向您的客户提供专属查询通道</div>
+                        <div class="step-item"><div class="step-num">3</div> 解锁高阶版返佣权益</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA区 -->
+        <div id="contact" class="container reveal">
+            <div class="cta-section">
+                <h2>与其人工犯错，不如让数据说话</h2>
+                <p>试点阶段轻量投入，2-4周即可明显感知人效提升与打单错误率下降。</p>
+                <a href="mailto:contact@example.com" class="btn-light">联系我们开启试点</a>
+                <div style="margin-top: 20px; font-size: 14px; opacity: 0.8; color: #fff;">
+                    * 当前 V1.0 PC 端优先邀测，后续将开放 Excel 批量核对与小程序能力。
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="logo" style="justify-content: center; margin-bottom: 16px;">
+                <div class="logo-icon" style="width: 24px; height: 24px; font-size: 12px;"><i class="fa-solid fa-globe"></i></div>
+                <span style="font-size: 18px;">TradeAI</span>
+            </div>
+            <p style="margin-bottom: 8px;">让企业检索变得更透明、更简单、更可复核</p>
+            <p>&copy; 2026 外贸助手产品团队. 保留所有权利.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 滚动渐显监听
+            const elements = document.querySelectorAll('.reveal');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            elements.forEach(element => {
+                observer.observe(element);
+            });
+            
+            // 首屏直接展示
+            setTimeout(() => {
+                const heroElements = document.querySelectorAll('.hero.reveal');
+                heroElements.forEach(el => el.classList.add('active'));
+            }, 100);
+        });
+    </script>
+</body>
+</html>
